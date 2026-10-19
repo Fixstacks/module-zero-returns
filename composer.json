@@ -2,7 +2,7 @@
     "name": "fixstacks/module-zero-returns",
     "description": "Zero for Magento Open Source: returns (RMA): the customer asks from My Account, the store approves, receives and refunds in Sales > Returns, with messages and emails.",
     "type": "magento2-module",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -30,7 +30,7 @@
         "magento/module-email": "*",
         "magento/module-sales": "*",
         "magento/module-store": "*",
-        "fixstacks/module-zero-core": "^1.1"
+        "fixstacks/module-zero-core": "^1.2"
     },
     "autoload": {
         "files": [
