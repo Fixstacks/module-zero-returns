@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    My Account menu: "My Returns".
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="customer_account_navigation">
+            <block class="Magento\Customer\Block\Account\SortLinkInterface" name="zero-returns-navigation-link"
+                   ifconfig="zero_returns/general/enabled">
+                <arguments>
+                    <argument name="label" xsi:type="string" translate="true">My Returns</argument>
+                    <argument name="path" xsi:type="string">returns/account</argument>
+                    <argument name="sortOrder" xsi:type="number">215</argument>
+                </arguments>
+            </block>
+        </referenceBlock>
+    </body>
+</page>

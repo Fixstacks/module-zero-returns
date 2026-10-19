@@ -1,0 +1,44 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * My Account > My Returns: the customer's returns, newest first.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\Returns\ViewModel\Storefront $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$returns = $viewModel->mine();
+?>
+<?php if (!$returns) : ?>
+    <p class="text-base-content/70" data-returns-empty>
+        <?= $escaper->escapeHtml(__('No returns yet. To return something, open the order under My Orders and choose "Request a return".')) ?>
+    </p>
+<?php else : ?>
+    <div class="overflow-x-auto">
+        <table class="table" data-returns>
+            <thead>
+                <tr>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Return')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Order')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Asked')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Items')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($returns as $return) : ?>
+                    <tr>
+                        <td><a class="link" href="<?= $escaper->escapeUrl($block->getUrl('returns/view/index', ['id' => (int) $return['return_id']])) ?>"><?= $escaper->escapeHtml($viewModel->number($return)) ?></a></td>
+                        <td>#<?= $escaper->escapeHtml($return['order_increment_id']) ?></td>
+                        <td class="whitespace-nowrap"><?= $escaper->escapeHtml(substr((string) $return['created_at'], 0, 10)) ?></td>
+                        <td class="tabular-nums"><?= (float) $return['qty'] ?></td>
+                        <td><?= $escaper->escapeHtml($viewModel->status($return)) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif; ?>

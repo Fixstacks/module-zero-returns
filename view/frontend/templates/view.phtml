@@ -1,0 +1,80 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * /returns/view/index/id/N: the return's status, items, instructions once
+ * approved, the comments both ways, and a comment form while it is open.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\Returns\ViewModel\Storefront $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$return = $viewModel->current();
+if (!$return) {
+    return;
+}
+$instructions = $viewModel->instructions($return);
+?>
+<div class="zero-returns-view flex flex-col gap-6" data-return data-return-status="<?= $escaper->escapeHtmlAttr($return['status']) ?>">
+    <dl class="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+        <dt class="text-base-content/60"><?= $escaper->escapeHtml(__('Status')) ?></dt>
+        <dd class="font-semibold" data-return-status-label><?= $escaper->escapeHtml($viewModel->status($return)) ?></dd>
+        <dt class="text-base-content/60"><?= $escaper->escapeHtml(__('Order')) ?></dt>
+        <dd><a class="link" href="<?= $escaper->escapeUrl($block->getUrl('sales/order/view', ['order_id' => (int) $return['order_id']])) ?>">#<?= $escaper->escapeHtml($return['order_increment_id']) ?></a></dd>
+        <dt class="text-base-content/60"><?= $escaper->escapeHtml(__('Asked')) ?></dt>
+        <dd><?= $escaper->escapeHtml($viewModel->date((string) $return['created_at'])) ?></dd>
+        <dt class="text-base-content/60"><?= $escaper->escapeHtml(__('You asked for')) ?></dt>
+        <dd><?= $escaper->escapeHtml($viewModel->resolution($return)) ?></dd>
+    </dl>
+    <?php if ($instructions !== '') : ?>
+        <div class="alert alert-info text-sm whitespace-pre-line" role="status"><?= $escaper->escapeHtml($instructions) ?></div>
+    <?php endif; ?>
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Item')) ?></th>
+                    <th scope="col" class="text-end"><?= $escaper->escapeHtml(__('Qty')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Reason')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($viewModel->items($return) as $item) : ?>
+                    <tr>
+                        <td><?= $escaper->escapeHtml($item['name']) ?><span class="block text-xs text-base-content/60 font-mono"><?= $escaper->escapeHtml($item['sku']) ?></span></td>
+                        <td class="text-end tabular-nums"><?= (float) $item['qty'] ?></td>
+                        <td><?= $escaper->escapeHtml($item['reason']) ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <?php if ($return['comment']) : ?>
+        <p class="text-sm whitespace-pre-line"><span class="font-semibold"><?= $escaper->escapeHtml(__('Your note:')) ?></span> <?= $escaper->escapeHtml($return['comment']) ?></p>
+    <?php endif; ?>
+    <section aria-labelledby="return-comments-title">
+        <h2 id="return-comments-title" class="text-lg font-semibold mb-3"><?= $escaper->escapeHtml(__('Messages')) ?></h2>
+        <ol class="flex flex-col gap-3" data-return-comments>
+            <?php foreach ($viewModel->comments($return) as $comment) : ?>
+                <li class="rounded-field border border-base-300 p-3 text-sm<?= $comment['is_admin'] ? ' bg-base-200/60' : '' ?>">
+                    <div class="text-xs text-base-content/60 mb-1">
+                        <?= $escaper->escapeHtml($comment['is_admin'] ? __('Store') : __('You')) ?> · <?= $escaper->escapeHtml($viewModel->date((string) $comment['created_at'])) ?>
+                        <?php if ($comment['status']) : ?> · <?= $escaper->escapeHtml($viewModel->status(['status' => $comment['status']])) ?><?php endif; ?>
+                    </div>
+                    <?php if ($comment['text'] !== '') : ?><p class="whitespace-pre-line"><?= $escaper->escapeHtml($comment['text']) ?></p><?php endif; ?>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+        <?php if ($viewModel->isOpen($return)) : ?>
+            <form method="post" action="<?= $escaper->escapeUrl($block->getUrl('returns/view/comment', ['id' => (int) $return['return_id']])) ?>" class="mt-4 flex flex-col gap-2 max-w-xl">
+                <?= $block->getBlockHtml('formkey') ?>
+                <label class="text-sm" for="return-comment-text"><?= $escaper->escapeHtml(__('Write to us')) ?></label>
+                <textarea name="text" id="return-comment-text" rows="3" maxlength="4000" required class="textarea textarea-bordered w-full"></textarea>
+                <button type="submit" class="btn btn-neutral self-start"><?= $escaper->escapeHtml(__('Send')) ?></button>
+            </form>
+        <?php endif; ?>
+    </section>
+    <p><a class="link text-sm" href="<?= $escaper->escapeUrl($block->getUrl('returns/account/index')) ?>">&larr; <?= $escaper->escapeHtml(__('All my returns')) ?></a></p>
+</div>

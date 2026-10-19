@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Zero_Returns::returns" title="Returns" translate="title" module="Zero_Returns" sortOrder="35"
+             parent="Magento_Sales::sales_operation" action="zero_returns/return/index" resource="Zero_Returns::returns"/>
+    </menu>
+</config>

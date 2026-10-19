@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    A return request for an order, its lines (order items with a quantity and
+    a reason) and the comments exchanged on it.
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="zero_return" resource="sales" engine="innodb" comment="Zero Returns">
+        <column xsi:type="int" name="return_id" unsigned="true" nullable="false" identity="true" comment="Return ID"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Order ID"/>
+        <column xsi:type="varchar" name="order_increment_id" length="50" nullable="false" comment="Order Number"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0" comment="Store ID"/>
+        <column xsi:type="int" name="customer_id" unsigned="true" nullable="true" comment="Customer ID"/>
+        <column xsi:type="varchar" name="customer_name" length="255" nullable="false" comment="Customer Name"/>
+        <column xsi:type="varchar" name="customer_email" length="255" nullable="false" comment="Customer Email"/>
+        <column xsi:type="varchar" name="status" length="20" nullable="false" default="pending" comment="Status"/>
+        <column xsi:type="varchar" name="resolution" length="20" nullable="false" default="refund" comment="Resolution Asked"/>
+        <column xsi:type="text" name="comment" nullable="true" comment="Customer's Comment"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="return_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ZERO_RETURN_ORDER_ID_SALES_ORDER_ENTITY_ID" table="zero_return" column="order_id"
+                    referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="ZERO_RETURN_CUSTOMER_ID_STATUS" indexType="btree">
+            <column name="customer_id"/>
+            <column name="status"/>
+        </index>
+        <index referenceId="ZERO_RETURN_STATUS_CREATED_AT" indexType="btree">
+            <column name="status"/>
+            <column name="created_at"/>
+        </index>
+    </table>
+    <table name="zero_return_item" resource="sales" engine="innodb" comment="Zero Return Items">
+        <column xsi:type="int" name="item_id" unsigned="true" nullable="false" identity="true" comment="Item ID"/>
+        <column xsi:type="int" name="return_id" unsigned="true" nullable="false" comment="Return ID"/>
+        <column xsi:type="int" name="order_item_id" unsigned="true" nullable="false" comment="Order Item ID"/>
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU"/>
+        <column xsi:type="varchar" name="name" length="255" nullable="false" comment="Name"/>
+        <column xsi:type="decimal" name="qty" scale="4" precision="12" nullable="false" comment="Qty"/>
+        <column xsi:type="varchar" name="reason" length="255" nullable="false" comment="Reason"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="item_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ZERO_RETURN_ITEM_RETURN_ID_ZERO_RETURN_RETURN_ID" table="zero_return_item" column="return_id"
+                    referenceTable="zero_return" referenceColumn="return_id" onDelete="CASCADE"/>
+        <index referenceId="ZERO_RETURN_ITEM_ORDER_ITEM_ID" indexType="btree">
+            <column name="order_item_id"/>
+        </index>
+    </table>
+    <table name="zero_return_comment" resource="sales" engine="innodb" comment="Zero Return Comments">
+        <column xsi:type="int" name="comment_id" unsigned="true" nullable="false" identity="true" comment="Comment ID"/>
+        <column xsi:type="int" name="return_id" unsigned="true" nullable="false" comment="Return ID"/>
+        <column xsi:type="smallint" name="is_admin" unsigned="true" nullable="false" default="0" comment="From the Store"/>
+        <column xsi:type="varchar" name="status" length="20" nullable="true" comment="Status Set With It"/>
+        <column xsi:type="text" name="text" nullable="false" comment="Text"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="comment_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="ZERO_RETURN_COMMENT_RETURN_ID_ZERO_RETURN_RETURN_ID" table="zero_return_comment" column="return_id"
+                    referenceTable="zero_return" referenceColumn="return_id" onDelete="CASCADE"/>
+    </table>
+</schema>

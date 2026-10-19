@@ -1,0 +1,58 @@
+{
+    "zero_return": {
+        "column": {
+            "return_id": true,
+            "order_id": true,
+            "order_increment_id": true,
+            "store_id": true,
+            "customer_id": true,
+            "customer_name": true,
+            "customer_email": true,
+            "status": true,
+            "resolution": true,
+            "comment": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "ZERO_RETURN_CUSTOMER_ID_STATUS": true,
+            "ZERO_RETURN_STATUS_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ZERO_RETURN_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "zero_return_item": {
+        "column": {
+            "item_id": true,
+            "return_id": true,
+            "order_item_id": true,
+            "sku": true,
+            "name": true,
+            "qty": true,
+            "reason": true
+        },
+        "index": {
+            "ZERO_RETURN_ITEM_ORDER_ITEM_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ZERO_RETURN_ITEM_RETURN_ID_ZERO_RETURN_RETURN_ID": true
+        }
+    },
+    "zero_return_comment": {
+        "column": {
+            "comment_id": true,
+            "return_id": true,
+            "is_admin": true,
+            "status": true,
+            "text": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ZERO_RETURN_COMMENT_RETURN_ID_ZERO_RETURN_RETURN_ID": true
+        }
+    }
+}

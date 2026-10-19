@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <zero_returns>
+            <general>
+                <enabled>1</enabled>
+                <window_days>30</window_days>
+                <reasons>Wrong size or fit
+Not as described
+Damaged or faulty
+Arrived too late
+Changed my mind
+Other</reasons>
+                <instructions>Pack the items with their tags and the order number, and send them to our returns address. We refund within 5 days of receiving them.</instructions>
+                <notify_identity>general</notify_identity>
+                <identity>sales</identity>
+                <template_new>zero_returns_general_template_new</template_new>
+                <template_received>zero_returns_general_template_received</template_received>
+                <template_update>zero_returns_general_template_update</template_update>
+            </general>
+        </zero_returns>
+    </default>
+</config>

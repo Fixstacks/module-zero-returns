@@ -1,0 +1,18 @@
+<!--@subject {{trans "Return request %number for order #%order from %name" number=$number order=$order name=$name}} @-->
+<!--@vars {
+"var number":"Return Number",
+"var order":"Order Number",
+"var name":"Customer Name",
+"var email":"Customer Email",
+"var resolution":"Resolution Asked",
+"var comment":"Customer's Comment",
+"var items_html|raw":"Items",
+"var admin_url":"Admin Link"
+} @-->
+{{template config_path="design/email/header_template"}}
+<p>{{trans "%name asks to return items of order #%order (%number), for a %resolution." name=$name order=$order number=$number resolution=$resolution}}</p>
+<p>{{var email}}</p>
+{{if comment}}<p style="white-space: pre-line;">{{var comment}}</p>{{/if}}
+{{var items_html|raw}}
+<p>{{trans "Handle it in the admin: Sales > Returns."}}</p>
+{{template config_path="design/email/footer_template"}}

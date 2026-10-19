@@ -1,0 +1,19 @@
+<!--@subject {{trans "Your return %number: %status" number=$number status=$status}} @-->
+<!--@vars {
+"var number":"Return Number",
+"var order":"Order Number",
+"var name":"Customer Name",
+"var status":"Status",
+"var message":"Message from the Store",
+"var instructions":"Return Instructions",
+"var url":"Return Link",
+"var store_name":"Store Name"
+} @-->
+{{template config_path="design/email/header_template"}}
+<p>{{trans "Hello %name," name=$name}}</p>
+<p>{{trans "Your return %number for order #%order is now: %status." number=$number order=$order status=$status}}</p>
+{{if message}}<p style="white-space: pre-line;">{{var message}}</p>{{/if}}
+{{if instructions}}<p style="white-space: pre-line;">{{var instructions}}</p>{{/if}}
+<p><a href="{{var url}}">{{trans "See the return"}}</a></p>
+<p>{{trans "Thank you, %store_name" store_name=$store_name}}</p>
+{{template config_path="design/email/footer_template"}}

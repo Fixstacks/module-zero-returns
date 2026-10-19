@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
+    <template id="zero_returns_general_template_new" label="Returns: New Request (to the Store)" file="new.html" type="html" module="Zero_Returns" area="frontend"/>
+    <template id="zero_returns_general_template_received" label="Returns: Request Received (to the Customer)" file="received.html" type="html" module="Zero_Returns" area="frontend"/>
+    <template id="zero_returns_general_template_update" label="Returns: Status or Comment (to the Customer)" file="update.html" type="html" module="Zero_Returns" area="frontend"/>
+</config>

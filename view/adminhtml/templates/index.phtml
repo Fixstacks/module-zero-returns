@@ -1,0 +1,117 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * Sales > Returns: one return (?id=) with its items, the conversation and a
+ * form to move it on or write to the customer; or every return.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\Returns\ViewModel\Admin $admin */
+$admin = $block->getData('view_model');
+$return = $admin->current();
+?>
+<?php if ($return) : ?>
+    <?php $next = $admin->nextStatuses($return); ?>
+    <p><a href="<?= $escaper->escapeUrl($admin->url('zero_returns/return/index')) ?>">&larr; <?= $escaper->escapeHtml(__('All returns')) ?></a></p>
+    <h2 class="admin__legend"><?= $escaper->escapeHtml($admin->number($return)) ?> · <span data-return-status><?= $escaper->escapeHtml($admin->statusLabel($return['status'])) ?></span></h2>
+    <table class="admin__table-secondary" style="max-width: 720px; margin-bottom: 20px;">
+        <tr><th><?= $escaper->escapeHtml(__('Order')) ?></th><td><a href="<?= $escaper->escapeUrl($admin->orderUrl($return)) ?>">#<?= $escaper->escapeHtml($return['order_increment_id']) ?></a> · <a href="<?= $escaper->escapeUrl($admin->creditMemoUrl($return)) ?>"><?= $escaper->escapeHtml(__('New credit memo')) ?></a></td></tr>
+        <tr><th><?= $escaper->escapeHtml(__('Customer')) ?></th><td><?= $escaper->escapeHtml($return['customer_name'] . ' (' . $return['customer_email'] . ')') ?></td></tr>
+        <tr><th><?= $escaper->escapeHtml(__('Asks for')) ?></th><td><?= $escaper->escapeHtml($admin->resolutionLabel($return['resolution'])) ?></td></tr>
+        <tr><th><?= $escaper->escapeHtml(__('Store View')) ?></th><td><?= $escaper->escapeHtml($admin->storeName($return)) ?></td></tr>
+        <tr><th><?= $escaper->escapeHtml(__('Asked (UTC)')) ?></th><td><?= $escaper->escapeHtml($return['created_at']) ?></td></tr>
+        <?php if ($return['comment']) : ?><tr><th><?= $escaper->escapeHtml(__('Their Note')) ?></th><td style="white-space: pre-line;"><?= $escaper->escapeHtml($return['comment']) ?></td></tr><?php endif; ?>
+    </table>
+    <table class="data-grid" style="margin-bottom: 20px; max-width: 900px;">
+        <thead>
+            <tr>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Item')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('SKU')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Qty')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Reason')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($admin->items($return) as $item) : ?>
+                <tr>
+                    <td><?= $escaper->escapeHtml($item['name']) ?></td>
+                    <td><?= $escaper->escapeHtml($item['sku']) ?></td>
+                    <td><?= (float) $item['qty'] ?></td>
+                    <td><?= $escaper->escapeHtml($item['reason']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    <h3><?= $escaper->escapeHtml(__('Messages')) ?></h3>
+    <ol style="list-style: none; padding: 0; max-width: 720px;" data-return-comments>
+        <?php foreach ($admin->comments($return) as $comment) : ?>
+            <li style="border: 1px solid #ddd; border-radius: 4px; padding: 8px 12px; margin-bottom: 8px;<?= $comment['is_admin'] ? ' background: #f5f5f5;' : '' ?>">
+                <small><?= $escaper->escapeHtml($comment['is_admin'] ? __('Store') : __('Customer')) ?> · <?= $escaper->escapeHtml($comment['created_at']) ?>
+                    <?php if ($comment['status']) : ?> · <?= $escaper->escapeHtml($admin->statusLabel($comment['status'])) ?><?php endif; ?></small>
+                <?php if ($comment['text'] !== '') : ?><p style="white-space: pre-line; margin: 4px 0 0;"><?= $escaper->escapeHtml($comment['text']) ?></p><?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ol>
+    <?php if ($next) : ?>
+        <form method="post" action="<?= $escaper->escapeUrl($admin->url('zero_returns/return/save')) ?>" style="max-width: 720px;" data-return-form>
+            <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKey()) ?>">
+            <input type="hidden" name="id" value="<?= (int) $return['return_id'] ?>">
+            <p><label><?= $escaper->escapeHtml(__('New status')) ?><br>
+                <select class="admin__control-select" name="status">
+                    <option value=""><?= $escaper->escapeHtml(__('(keep: %1)', $admin->statusLabel($return['status']))) ?></option>
+                    <?php foreach ($next as $value => $label) : ?>
+                        <option value="<?= $escaper->escapeHtmlAttr($value) ?>"><?= $escaper->escapeHtml($label) ?></option>
+                    <?php endforeach; ?>
+                </select></label></p>
+            <p><label><?= $escaper->escapeHtml(__('Message to the customer')) ?><br>
+                <textarea class="admin__control-textarea" name="message" rows="3" style="width: 520px;"></textarea></label></p>
+            <p><button type="submit" class="action-primary"><?= $escaper->escapeHtml(__('Save and Email the Customer')) ?></button></p>
+        </form>
+    <?php else : ?>
+        <p><?= $escaper->escapeHtml(__('This return is finished.')) ?></p>
+    <?php endif; ?>
+<?php else : ?>
+    <form method="get" action="<?= $escaper->escapeUrl($admin->url('zero_returns/return/index')) ?>" style="margin-bottom: 15px; display: flex; gap: 8px;">
+        <select class="admin__control-select" name="status" aria-label="<?= $escaper->escapeHtmlAttr(__('Status')) ?>">
+            <option value=""><?= $escaper->escapeHtml(__('All')) ?></option>
+            <?php foreach ($admin->statuses() as $value => $label) : ?>
+                <option value="<?= $escaper->escapeHtmlAttr($value) ?>"<?= $admin->status() === $value ? ' selected' : '' ?>><?= $escaper->escapeHtml($label) ?></option>
+            <?php endforeach; ?>
+        </select>
+        <input class="admin__control-text" type="search" name="q" value="<?= $escaper->escapeHtmlAttr($admin->search()) ?>"
+               placeholder="<?= $escaper->escapeHtmlAttr(__('Order number, name or email')) ?>" aria-label="<?= $escaper->escapeHtmlAttr(__('Search returns')) ?>" style="width: 280px;">
+        <button type="submit" class="action-secondary"><?= $escaper->escapeHtml(__('Search')) ?></button>
+    </form>
+    <table class="data-grid zero-returns-list">
+        <thead>
+            <tr>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Return')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Order')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Customer')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Items')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Asks for')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Status')) ?></th>
+                <th class="data-grid-th"><?= $escaper->escapeHtml(__('Asked (UTC)')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($admin->all() as $row) : ?>
+                <tr>
+                    <td><a href="<?= $escaper->escapeUrl($admin->url('zero_returns/return/index', ['id' => $row['return_id']])) ?>"><?= $escaper->escapeHtml($admin->number($row)) ?></a></td>
+                    <td>#<?= $escaper->escapeHtml($row['order_increment_id']) ?></td>
+                    <td><?= $escaper->escapeHtml($row['customer_name'] . ' (' . $row['customer_email'] . ')') ?></td>
+                    <td><?= (float) $row['qty'] ?></td>
+                    <td><?= $escaper->escapeHtml($admin->resolutionLabel($row['resolution'])) ?></td>
+                    <td><?= $escaper->escapeHtml($admin->statusLabel($row['status'])) ?></td>
+                    <td><?= $escaper->escapeHtml($row['created_at']) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            <?php if (!$admin->all()) : ?>
+                <tr><td colspan="7"><?= $escaper->escapeHtml(__('No returns.')) ?></td></tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+<?php endif; ?>

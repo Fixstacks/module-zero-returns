@@ -1,0 +1,86 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * /returns/request?order=: the order's returnable lines with a quantity and
+ * a reason each, the resolution asked for, a comment; one plain POST.
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\Returns\ViewModel\Storefront $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$order = $viewModel->order();
+if (!$order) {
+    return;
+}
+$reasons = $viewModel->reasons();
+?>
+<form method="post" action="<?= $escaper->escapeUrl($block->getUrl('returns/request/save', ['_query' => ['order' => (int) $order->getEntityId()]])) ?>"
+      class="zero-returns-request flex flex-col gap-6" data-returns-form>
+    <?= $block->getBlockHtml('formkey') ?>
+    <p class="text-sm text-base-content/70">
+        <?= $escaper->escapeHtml(__('Order #%1, placed %2. Pick the items you are sending back and tell us why.', $order->getIncrementId(), $viewModel->date((string) $order->getCreatedAt()))) ?>
+    </p>
+    <div class="overflow-x-auto">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Item')) ?></th>
+                    <th scope="col" class="w-32"><?= $escaper->escapeHtml(__('Return qty')) ?></th>
+                    <th scope="col"><?= $escaper->escapeHtml(__('Reason')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($viewModel->returnable($order) as $orderItemId => $line) : ?>
+                    <?php $item = $line['item']; ?>
+                    <tr>
+                        <td>
+                            <?= $escaper->escapeHtml($item->getName()) ?>
+                            <span class="block text-xs text-base-content/60 font-mono"><?= $escaper->escapeHtml($item->getSku()) ?></span>
+                            <?php foreach ((array) ($item->getProductOptions()['attributes_info'] ?? []) as $option) : ?>
+                                <span class="block text-xs text-base-content/60"><?= $escaper->escapeHtml($option['label'] . ': ' . $option['value']) ?></span>
+                            <?php endforeach; ?>
+                        </td>
+                        <td>
+                            <label class="sr-only" for="return-qty-<?= (int) $orderItemId ?>"><?= $escaper->escapeHtml(__('Quantity of %1 to return', $item->getName())) ?></label>
+                            <input type="number" name="items[<?= (int) $orderItemId ?>]" id="return-qty-<?= (int) $orderItemId ?>"
+                                   value="0" min="0" max="<?= (float) $line['qty'] ?>" step="any" class="input input-bordered input-sm w-24">
+                            <span class="block text-xs text-base-content/60 mt-1"><?= $escaper->escapeHtml(__('of %1', $line['qty'] + 0)) ?></span>
+                        </td>
+                        <td>
+                            <?php if ($reasons) : ?>
+                                <label class="sr-only" for="return-reason-<?= (int) $orderItemId ?>"><?= $escaper->escapeHtml(__('Reason for %1', $item->getName())) ?></label>
+                                <select name="reason[<?= (int) $orderItemId ?>]" id="return-reason-<?= (int) $orderItemId ?>" class="select select-bordered select-sm w-full max-w-xs">
+                                    <?php foreach ($reasons as $reason) : ?>
+                                        <option value="<?= $escaper->escapeHtmlAttr($reason) ?>"><?= $escaper->escapeHtml($reason) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php else : ?>
+                                <input type="text" name="reason[<?= (int) $orderItemId ?>]" maxlength="255" class="input input-bordered input-sm w-full max-w-xs"
+                                       aria-label="<?= $escaper->escapeHtmlAttr(__('Reason for %1', $item->getName())) ?>">
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <fieldset class="flex flex-wrap gap-4">
+        <legend class="text-sm font-semibold mb-2"><?= $escaper->escapeHtml(__('What would you like?')) ?></legend>
+        <?php foreach ($viewModel->resolutions() as $value => $label) : ?>
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+                <input type="radio" name="resolution" value="<?= $escaper->escapeHtmlAttr($value) ?>" class="radio radio-sm"<?= $value === 'refund' ? ' checked' : '' ?>>
+                <?= $escaper->escapeHtml($label) ?>
+            </label>
+        <?php endforeach; ?>
+    </fieldset>
+    <label class="flex flex-col gap-1 text-sm max-w-xl"><span><?= $escaper->escapeHtml(__('Anything we should know (optional)')) ?></span>
+        <textarea name="comment" rows="3" maxlength="4000" class="textarea textarea-bordered w-full"></textarea>
+    </label>
+    <div class="flex gap-3">
+        <button type="submit" class="btn btn-primary"><?= $escaper->escapeHtml(__('Send Return Request')) ?></button>
+        <a class="btn btn-ghost" href="<?= $escaper->escapeUrl($block->getUrl('sales/order/view', ['order_id' => (int) $order->getEntityId()])) ?>"><?= $escaper->escapeHtml(__('Back to the order')) ?></a>
+    </div>
+</form>

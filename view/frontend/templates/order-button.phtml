@@ -1,0 +1,22 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * My Orders > order: "Request a return", among the order's buttons, while
+ * the order has items to return inside the return window.
+ *
+ * @var \Magento\Sales\Block\Order\Info $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Zero\Returns\ViewModel\Storefront $viewModel
+ */
+$viewModel = $block->getData('viewModel');
+$order = $block->getOrder();
+if (!$viewModel->canRequestFor($order)) {
+    return;
+}
+?>
+<a href="<?= $escaper->escapeUrl($block->getUrl('returns/request/index', ['_query' => ['order' => (int) $order->getEntityId()]])) ?>"
+   class="action link link-neutral text-sm no-underline hover:underline" data-request-return>
+    <span><?= $escaper->escapeHtml(__('Request a return')) ?></span>
+</a>
