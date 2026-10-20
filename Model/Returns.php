@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Zero\Returns\Model;
 
 use Magento\Framework\App\ResourceConnection;
+use Magento\Framework\Event\ManagerInterface as EventManager;
 
 /**
  * Return requests (zero_return), their lines and comments. A return goes
@@ -35,8 +36,10 @@ class Returns
     private const ITEMS = 'zero_return_item';
     private const COMMENTS = 'zero_return_comment';
 
-    public function __construct(private readonly ResourceConnection $resource)
-    {
+    public function __construct(
+        private readonly ResourceConnection $resource,
+        private readonly ?EventManager $eventManager = null
+    ) {
     }
 
     /**
@@ -68,8 +71,10 @@ class Returns
             $connection->rollBack();
             throw $e;
         }
-
-        return $this->get($id);
+        $row = $this->get($id);
+        // Zero_Webhooks listens (return.created).
+        $this->eventManager?->dispatch('zero_returns_created', ['return' => $row, 'items' => $this->items($id), 'store_id' => (int) $row['store_id']]);
+        return $row;
     }
 
     public function get(int $id): ?array
@@ -159,6 +164,7 @@ class Returns
     public function comment(int $returnId, string $text, bool $isAdmin, ?string $status = null): void
     {
         $connection = $this->resource->getConnection();
+        $previous = $status !== null ? (string) ($this->get($returnId)['status'] ?? '') : '';
         if ($status !== null && in_array($status, self::STATUSES, true)) {
             $connection->update($this->resource->getTableName(self::TABLE), ['status' => $status], ['return_id = ?' => $returnId]);
         }
@@ -168,6 +174,14 @@ class Returns
                 'is_admin' => $isAdmin ? 1 : 0,
                 'status' => $status,
                 'text' => $text,
+            ]);
+        }
+        if ($status !== null && $status !== $previous && ($row = $this->get($returnId))) {
+            // Zero_Webhooks listens (return.status_changed).
+            $this->eventManager?->dispatch('zero_returns_status_changed', [
+                'return' => $row,
+                'changes' => ['status' => ['from' => $previous, 'to' => $status]],
+                'store_id' => (int) $row['store_id'],
             ]);
         }
     }
