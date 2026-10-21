@@ -1,4 +1,4 @@
-# fixstacks/module-zero-returns — licensing
+# zerofront/module-zero-returns — licensing
 
 Copyright © 2026 Roman Pasichnyk.
 
